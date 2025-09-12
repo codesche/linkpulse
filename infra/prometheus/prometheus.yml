@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['prometheus:9090']
+
+  # 애플리케이션에서 actuator-prometheus 노출 시 추가 (예: auth-service)
+#   - job_name: 'auth-service'
+#     metrics_path: /actuator/prometheus
+#     static_configs:
+#       - targets: ['host.docker.internal:8081']  # 예: auth-service를 8081로 띄울 경우

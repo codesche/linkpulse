@@ -1,0 +1,125 @@
+version: "3.9"
+
+name: linkpulse
+services:
+  postgres:
+    image: postgres:16.4
+    container_name: lp-postgres
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: linkpulse
+    ports: ["5432:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d linkpulse"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks: [ linkpulse-net ]
+
+  redis:
+    image: redis:7.2
+    container_name: lp-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    ports: ["6379:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [ linkpulse-net ]
+
+  # Zookeeper + Kafka (3.9.x)
+  zookeeper:
+    image: bitnami/zookeeper:3.9
+    container_name: lp-zookeeper
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+    ports: ["2181:2181"]
+    networks: [ linkpulse-net ]
+
+  kafka:
+    image: bitnami/kafka:3.9
+    container_name: lp-kafka
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092
+      # 로컬에서 애플리케이션을 실행(bootRun)할 때 접속 편의 위해 localhost로 광고
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+    ports: ["9092:9092"]
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    networks: [ linkpulse-net ]
+
+  mongo:
+    image: mongo:7.0
+    container_name: lp-mongo
+    ports: ["27017:27017"]
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    volumes:
+      - mongodata:/data/db
+    networks: [ linkpulse-net ]
+
+  elasticsearch:
+    image: elastic/elasticsearch:8.18.6
+    container_name: lp-elastic
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports: ["9200:9200","9300:9300"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsSL http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    networks: [ linkpulse-net ]
+
+  kibana:
+    image: elastic/kibana:8.18.6
+    container_name: lp-kibana
+    depends_on:
+      - elasticsearch
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    ports: ["5601:5601"]
+    networks: [ linkpulse-net ]
+
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    container_name: lp-prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    ports: ["9090:9090"]
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks: [ linkpulse-net ]
+
+  grafana:
+    image: grafana/grafana:10.4.3
+    container_name: lp-grafana
+    depends_on: [ prometheus ]
+    ports: ["3000:3000"]
+    networks: [ linkpulse-net ]
+
+networks:
+  linkpulse-net:
+
+volumes:
+  pgdata:
+  mongodata:
+  esdata:
