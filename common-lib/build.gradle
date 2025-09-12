@@ -2,8 +2,32 @@ plugins {
     id "java-library"
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
 dependencies {
-    implementation "org.springframework.boot:spring-boot-starter-validation"
+    // 경량 공통 모듈: Web 전체 대신 context/web/validation으로 구성
+    api "org.springframework:spring-web"
+    api "org.springframework:spring-context"
+    api "org.springframework.boot:spring-boot-starter-validation"
+
+    // (선택) 메트릭 연동 시 공통에서 actuator 의존하도록 하려면 아래 사용
+    // api "org.springframework.boot:spring-boot-starter-actuator"
+
+    // Lombok (Setter 지양—Getter/Builder 위주)
     compileOnly "org.projectlombok:lombok:1.18.32"
     annotationProcessor "org.projectlombok:lombok:1.18.32"
+
+    // 서블릿 API를 컴파일만 가능하게
+    compileOnly "jakarta.servlet:jakarta.servlet-api"   // Boot BOM 쓰면 버전 생략 가능
+
+    testImplementation "org.springframework:spring-test"
+    testImplementation "org.junit.jupiter:junit-jupiter"
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
 }
