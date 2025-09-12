@@ -1,0 +1,14 @@
+
+plugins {
+    id "org.springframework.boot"
+}
+
+dependencies {
+    implementation project(":common-lib")
+
+    implementation "org.springframework.boot:spring-boot-starter-web"
+    implementation "org.springframework.kafka:spring-kafka"
+    implementation "org.apache.kafka:kafka-streams:3.9.0"
+    implementation "org.springframework.boot:spring-boot-starter-data-elasticsearch"
+    implementation "org.springframework.boot:spring-boot-starter-data-mongodb"
+}

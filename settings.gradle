@@ -1,0 +1,6 @@
+rootProject.name = 'linkpulse'
+
+include("common-lib")
+include("auth-service")
+include("link-service")
+include("analytics-service")
