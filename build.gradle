@@ -28,6 +28,10 @@ subprojects {
         implementation 'org.springframework.boot:spring-boot-starter'
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+        // Lombok (Setter 지양—Getter/Builder 위주)
+        compileOnly "org.projectlombok:lombok:1.18.32"
+        annotationProcessor "org.projectlombok:lombok:1.18.32"
     }
 
     dependencyManagement {
