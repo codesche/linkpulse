@@ -15,7 +15,8 @@ spring:
       ddl-auto: update   # Day1~2 동안만 임시. 이후 validate로 바꿔.
     properties:
       hibernate:
-        jdbc.time_zone: UTC
+        jdbc:
+          time_zone: UTC
 
   data:
     redis:
@@ -39,6 +40,6 @@ jwt:
   issuer: "linkpulse"
   access-token-ttl-seconds: 900
   refresh-token-ttl-seconds: 1209600
-  secret: "CHANGE_ME"
+  secret: ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJ
 
 
