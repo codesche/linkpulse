@@ -18,6 +18,7 @@ public class SecurityConfig {
         http.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.authorizeHttpRequests(reg -> reg
             .requestMatchers("/ping", "/auth/**").permitAll()
+            .requestMatchers("/api/links/**").authenticated()       // JWT 연동 시 보안 강화
             .anyRequest().authenticated()
         );
 
